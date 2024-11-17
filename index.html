@@ -328,6 +328,17 @@ map.on("load", function() {
             }
         });
     };
+    
+    map.addSource('recent-earthquake', {
+    type: 'geojson',
+    data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson' 
+
+        map.addLayer({
+            'id': 'earthquakes-layer',
+            'type': 'circle',
+            'source': 'earthquakes'
+        })
+    });
 
     // As the map moves, grab and update bounds in inset map.
     if (config.inset) {
