@@ -90,21 +90,29 @@ var config = {
         },
         {
             id: 'fourth-chapter',
-            alignment: 'fully',
+            alignment: 'right',
             hidden: false,
-            title: 'SEISMIC+EARTHQUAKE = HIGH RISK AREAS',
-            image: './path/to/image/source.png',
+            title: 'Soil Liquefaction: Seismic Hazards and Earthquake Activities',
+            image: './images/liquefaction-hazard-map.pdf.png',
             description: 'Copy these sections to add to your story.',
             location: {
-                center: [-58.54195, -34.71600],
-                zoom: 4,
+                center: [-122.03322, 47.46372],
+                zoom: 9.1,
                 pitch: 0,
                 bearing: 0
             },
             mapAnimation: 'flyTo',
             rotateAnimation: false,
             callback: '',
-            onChapterEnter: [],
+            onChapterEnter: [
+                {
+                    layer: 'earthquakes-layer',
+                    opacity: 1,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 1,
+               }
+            ],
             onChapterExit: []
         }
     ]
