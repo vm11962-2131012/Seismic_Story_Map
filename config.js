@@ -20,20 +20,22 @@ var config = {
             image: './path/to/image/source.png',
             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
             location: {
-                center: [-122.418398, 37.759483],
-                zoom: 8.5,
-                pitch: 60,
+                center: [-122.34518, 47.67625],
+                zoom: 9.5,
+                pitch: 50,
                 bearing: 0
             },
             mapAnimation: 'flyTo',
             rotateAnimation: false,
             callback: '',
             onChapterEnter: [
-                // {
-                //     layer: 'layer-name',
-                //     opacity: 1,
-                //     duration: 5000
-                // }
+                {
+                    layer: 'earthquakes-layer',
+                    opacity: 0,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 0,
+               }
             ],
             onChapterExit: [
                 // {
@@ -77,15 +79,22 @@ var config = {
             image: './path/to/image/source.png',
             description: 'Copy these sections to add to your story.',
             location: {
-                center: [6.15116, 46.20595],
-                zoom: 12.52,
-                pitch: 8.01,
+                center: [-122.02352, 47.49886],
+                zoom: 14,
+                pitch: 73,
                 bearing: 0.00
             },
             mapAnimation: 'flyTo',
             rotateAnimation: false,
             callback: '',
-            onChapterEnter: [],
+            onChapterEnter: [
+                {
+                    layer: 'earthquakes-layer',
+                    opacity: 1,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 1,
+               }],
             onChapterExit: []
         },
         {
