@@ -352,7 +352,7 @@ map.on("load", function() {
         'type': 'fill',
         'source': {
             'type': 'geojson',
-            'data': 'data/Cities_and_Unincorporated_King_County___city_kc_area.geojson'
+            'data': 'data/world-cities.geojson'
         },
         'paint': {
             'fill-color': '#2A2929',
@@ -366,7 +366,7 @@ map.on("load", function() {
         'type': 'line',
         'source': {
             'type': 'geojson',
-            'data': 'data/Cities_and_Unincorporated_King_County___city_kc_area.geojson'
+            'data': 'data/world-cities.geojson'
         },
         'paint': {
             'line-color': '#F33400',
@@ -415,7 +415,7 @@ map.on("load", function() {
             const feature = event.features[0];
             new mapboxgl.Popup()
             .setLngLat(event.lngLat) 
-            .setHTML(`<strong>City:</strong> ${event.features[0].properties.CITYNAME}<br>
+            .setHTML(`<strong>City:</strong> ${event.features[0].properties.city}<br>
                       <strong>Population:</strong> ${event.features[0].properties.population}`)
             .addTo(map);
         }
