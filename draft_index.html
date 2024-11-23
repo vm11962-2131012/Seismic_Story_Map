@@ -341,7 +341,7 @@ map.on("load", function() {
         // add the DEM source as a terrain layer with exaggerated height
         map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
     });
-        
+
     map.addSource('recent-earthquake', {
         type: 'geojson',
         data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson'
@@ -379,8 +379,37 @@ map.on("load", function() {
         'type': 'circle',
         'source': 'recent-earthquake',
         'paint': {
-            'circle-color': '#800000',
+            'circle-radius': ['interpolate', ['linear'], ['get', 'mag'],
+            1, 0.7,
+            1.5, 2,
+            2, 4,
+            2.5, 5,
+            3, 6,
+            3.5, 7,
+            4.5, 9,
+            6.5, 15,
+            8.5, 17,
+            10.5, 20],
+            'circle-stroke-width': 1,
+            'circle-color': ['interpolate', ['linear'], ['get', 'mag'],
+            1, '#fff7ec',
+            1.5, '#fee8c8',
+            2, '#fdd49e',
+            2.5, '#fdbb84',
+            3, '#fc8d59',
+            3.5, '#ef6548',
+            4.5, '#d7301f',
+            6.5, '#b30000',
+            8.5, '#7f0000',
+            10.5, '#000'],
+            'circle-stroke-color': 'black'
         }
+    });
+    map.on('click', 'earthquakes-layer', (event) => {
+        new mapboxgl.Popup()
+        .setLngLat(event.features[0].geometry.coordinates)
+        .setHTML(`<strong>Magnitutde:</strong>${event.features[0].properties.mag}`)
+        .addTo(map);
     });
 
     map.addLayer({
@@ -408,13 +437,13 @@ map.on("load", function() {
             'line-color': '#F33400',
             'line-opacity' : 1
         }
-    }); 
+    });
 
     map.on('click', 'city-layer', (event) => {
         if (event.features.length > 0) {
             const feature = event.features[0];
             new mapboxgl.Popup()
-            .setLngLat(event.lngLat) 
+            .setLngLat(event.lngLat)
             .setHTML(`<strong>City:</strong> ${event.features[0].properties.city}<br>
                       <strong>Population:</strong> ${event.features[0].properties.population}`)
             .addTo(map);
@@ -443,7 +472,7 @@ map.on("load", function() {
     .onStepEnter(async response => {
         var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
         var chapter = config.chapters[current_chapter];
-        
+
         response.element.classList.add('active');
         map[chapter.mapAnimation || 'flyTo'](chapter.location);
 
