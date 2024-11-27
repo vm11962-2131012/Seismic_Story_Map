@@ -125,7 +125,7 @@ var config = {
             onChapterEnter: [
                 {
                    layer: 'city-layer',
-                   opacity: 1,
+                   opacity: 0,
                 }, {
                    layer: 'earthquakes-layer',
                    opacity: 1,
