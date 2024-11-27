@@ -74,33 +74,10 @@ var config = {
             ]
         },
         {
-            id: 'third-identifier',
+            id: 'third-chapter',
             alignment: 'left',
-            hidden: false,
-            title: 'EARTHQUAKE ACTIVITY CHAPTER',
-            image: './path/to/image/source.png',
-            description: 'Copy these sections to add to your story.',
-            location: {
-                center: [-122.02352, 47.49886],
-                zoom: 9.8,
-                pitch: 73,
-                bearing: 0.00
-            },
-            mapAnimation: 'flyTo',
-            rotateAnimation: false,
-            callback: '',
-            onChapterEnter: [
-                {
-                    layer: 'earthquakes-layer',
-                    opacity: 1,
-                }],
-            onChapterExit: []
-        },
-        {
-            id: 'fourth-chapter',
-            alignment: 'right',
             title: 'Earthquakes in Seismic Hazard Areas',
-            image: './images/',
+            image: './images',
             description: 'Copy these sections to add to your story.',
             location: {
                 center: [-122.03322, 47.46372],
@@ -113,22 +90,32 @@ var config = {
             callback: '',
             onChapterEnter: [
                 {
-                    layer: 'seismic-layer',
+                    layer: 'earthquakes-layer',
                     opacity: 1,
-                }
+                 }, {
+                    layer: 'seismic-layer',
+                    opacity: 0,
+                 }, {
+                    layer: 'city-layer',
+                    opacity: 0,
+                 }, {  
+                    layer: 'city-line-layer',
+                    opacity: 0,
+                 },
             ],
             onChapterExit: []
         },
         {
-            id: 'fifth-chapter',
-            alignment: 'left',
+            id: 'fourth-chapter',
+            alignment: 'right',
             hidden: false,
-            title: 'Soil Liquefaction: Seismic Hazards and Earthquake Activities',
+            interactive: true,
+            title: 'Liquefaction: Seismic Hazards and Earthquake Activity found',
             image: './images/liquefaction-hazard-map.pdf.png',
-            description: 'Copy these sections to add to your story.',
+            description: 'With liquefaction occuring in various areas through King County, the loss in soil stability due to earthquakes, poses various hazards for residents and anyone within King County. The damage that is followed by earthquake shaking affects roads, infrastructure, homes and anything else that lies within the seismic hazard areas including populations residing there. There is a current King County Regional Hazard Mitigation Plan that helps track down seismic hazard areas and is in the process of addressing the risks. This plan has also helped develop strategies to enhance resilience in these areas, getting rid of vulnerabilities in areas impacted by soil liquefaction from earthquakes. Using the map and the visuals to understand policies, seismic activity and recent earthquakes these can help us prepare for future earthquake impacts and take the correct measures to help save our communities.',
             location: {
-                center: [-122.03322, 47.46372],
-                zoom: 9.1,
+                center: [-121.88008, 47.47291],
+                zoom: 9,
                 pitch: 0,
                 bearing: 0
             },
@@ -137,15 +124,52 @@ var config = {
             callback: '',
             onChapterEnter: [
                 {
-                    layer: 'earthquakes-layer',
-                    opacity: 1,
+                   layer: 'city-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'earthquakes-layer',
+                   opacity: 1,
                 }, {
                    layer: 'seismic-layer',
                    opacity: 1,
-               }, {
-                layer: 'city-layer',
-                opacity: 1,
-               }
+                }, {  
+                   layer: 'city-line-layer',
+                   opacity: 1,
+                },
+            ],
+            onChapterExit: []
+        },
+        {
+            id: 'fifth-chapter',
+            alignment: 'right',
+            hidden: false,
+            interactive: true,
+            title: 'Interactive Seismic Hazards and Earthquake Visual ',
+            image: './graph.svg',
+            description: 'Interactive map to view seismic activity and population growth over time.',
+            location: {
+                center: [-121.88008, 47.47291],
+                zoom: 9,
+                pitch: 0,
+                bearing: 0
+            },
+            mapAnimation: 'flyTo',
+            rotateAnimation: false,
+            callback: '',
+            onChapterEnter: [
+                {
+                   layer: 'city-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'earthquakes-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 1,
+                }, {  
+                   layer: 'city-line-layer',
+                   opacity: 1,
+                },
             ],
             onChapterExit: []
         }
