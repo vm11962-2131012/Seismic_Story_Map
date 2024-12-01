@@ -17,7 +17,7 @@ var config = {
             alignment: 'left',
             hidden: false,
             title: 'INTRO CHAPTER',
-            image: './path/to/image/source.png',
+            image: './images/kingcountyphoto.jpg',
             description: 'King County is located in the heart of the Puget Sound region in Washington state. It is the most populous county in the state with over 2.2 million residents calling it home. King County covers a total of 2,130 square miles of land across cities like Seattle, Bellevue, Tacoma, and Renton. King County features urban centers, lush forests, scenic mountains, and expansive waterways. This vibrant area has become one of the fastest growing cities in the world. King County also lies on top of the Cascadia Subduction Zone and many other faults. The Cascadia Subduction Zone is a major tectonic plate boundary where the Juan de Fuca Plate subducts beneath the North American Plate, posing risk of megathrust earthquakes. King County also sits criss-crossed on top of the Seattle Fault and South Whidbey Island Fault which are capable of producing smaller earthquakes. The Cascadia Subduction Zone is a part of the Pacific Ring of Fire, parts of the Pacific Ocean where high levels of seismic and volcanic activity are present making it one of the most geologically active regions in the world.',
             location: {
                 center: [-122.34518, 47.67625],
@@ -55,7 +55,7 @@ var config = {
                 center: [-121.93090, 47.43191],
                 zoom: 9.8,
                 pitch: 65,
-                bearing: 43.2,
+                bearing: -43.2,
             },
             mapAnimation: 'flyTo',
             rotateAnimation: true,
@@ -77,16 +77,16 @@ var config = {
             id: 'third-chapter',
             alignment: 'left',
             title: 'Earthquakes in Seismic Hazard Areas',
-            image: './images',
-            description: 'Copy these sections to add to your story.',
+            image: './images/earthquakecrack.jpg',
+            description: 'Next we look at some recent seismic activity recorded in King County. Here we have a map of King County with dots representing recorded seismic activity. The live earthquake data is sourced from the United States Geological Survey (USGS), which tracks seismic activity in real-time and updates every minute to reflect earthquakes recorded within the past 30 days. Looking at this map we can see mostly smaller earthquakes of magnitude 3.0 and below spread out across the county. Multiple small earthquakes hitting the same spots over time can still create danger for people and wildlife in those areas as small earthquakes can still create great shaking.',
             location: {
                 center: [-122.03322, 47.46372],
-                zoom: 9.1,
-                pitch: 0,
-                bearing: 0
+                zoom: 9.8,
+                pitch: 65,
+                bearing: 43.2
             },
             mapAnimation: 'easeTo',
-            rotateAnimation: false,
+            rotateAnimation: true,
             callback: '',
             onChapterEnter: [
                 {
@@ -98,7 +98,7 @@ var config = {
                  }, {
                     layer: 'city-layer',
                     opacity: 0,
-                 }, {  
+                 }, {
                     layer: 'city-line-layer',
                     opacity: 0,
                  },
@@ -132,7 +132,7 @@ var config = {
                 }, {
                    layer: 'seismic-layer',
                    opacity: 1,
-                }, {  
+                }, {
                    layer: 'city-line-layer',
                    opacity: 1,
                 },
@@ -141,7 +141,7 @@ var config = {
         },
         {
             id: 'fifth-chapter',
-            alignment: 'right',
+            alignment: 'left',
             hidden: false,
             interactive: true,
             title: 'Interactive Seismic Hazards and Earthquake Visual ',
@@ -166,7 +166,7 @@ var config = {
                 }, {
                    layer: 'seismic-layer',
                    opacity: 1,
-                }, {  
+                }, {
                    layer: 'city-line-layer',
                    opacity: 1,
                 },
