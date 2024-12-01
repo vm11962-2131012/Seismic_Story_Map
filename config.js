@@ -8,7 +8,7 @@ var config = {
     use3dTerrain: true, // map set to 3d
     auto: false,
     title: 'Seismic Hazards and Recent Earthquake activity',
-    subtitle: 'A descriptive and interesting subtitle to draw in the reader',
+    subtitle: 'A storymap exploring liquefaction threats with recent earthquakes.',
     byline: 'By a Victoria Martinez and Yi Hong Huang',
     footer: 'Source: source citations, etc. <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
     chapters: [
@@ -16,7 +16,7 @@ var config = {
             id: 'slug-style-id',
             alignment: 'left',
             hidden: false,
-            title: 'INTRO CHAPTER',
+            title: 'Earthquakes and King County',
             image: './images/kingcountyphoto.jpg',
             description: 'King County is located in the heart of the Puget Sound region in Washington state. It is the most populous county in the state with over 2.2 million residents calling it home. King County covers a total of 2,130 square miles of land across cities like Seattle, Bellevue, Tacoma, and Renton. King County features urban centers, lush forests, scenic mountains, and expansive waterways. This vibrant area has become one of the fastest growing cities in the world. King County also lies on top of the Cascadia Subduction Zone and many other faults. The Cascadia Subduction Zone is a major tectonic plate boundary where the Juan de Fuca Plate subducts beneath the North American Plate, posing risk of megathrust earthquakes. King County also sits criss-crossed on top of the Seattle Fault and South Whidbey Island Fault which are capable of producing smaller earthquakes. The Cascadia Subduction Zone is a part of the Pacific Ring of Fire, parts of the Pacific Ocean where high levels of seismic and volcanic activity are present making it one of the most geologically active regions in the world.',
             location: {
@@ -144,9 +144,9 @@ var config = {
             alignment: 'left',
             hidden: false,
             interactive: true,
-            title: 'Interactive Seismic Hazards and Earthquake Visual ',
-            image: './graph.svg',
-            description: 'Interactive map to view seismic activity and population growth over time.',
+            title: 'Living in a Seismic Area',
+            image: './images/infographic.jpeg',
+            description: 'After looking closely at where recent earthquakes happen in King County we can see Issaquah as an area of high risk as many small earthquakes happened recently on top of the liquefaction areas. The city itself is aware of these facts and has done emergency training with its Citizen Corp. In case of a major earthquake on the Cascadia Subduction Zone, the area will feel major shaking and some chimneys could break. The last time an earthquake impacted this region was the 2001 Nisqually Earthquake with a magnitude of 6.8 and it caused $1-4 billion dollars worth of damage. Living in an active seismic area poses many risks and people living in it should have emergency plans, secure heavy furniture, assemble disaster supply kits, and know their evacuation routes. Subscribing to local alerts and checking government websites are also a great way to stay updated.',
             location: {
                 center: [-121.88008, 47.47291],
                 zoom: 9,
