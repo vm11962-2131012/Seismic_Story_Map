@@ -52,7 +52,7 @@ var config = {
             image: './images/screenshot-2023-04-17-083100-1024x597.png',
             description: 'Due to our topic surrounding the environmental hazards in King County our first dataset, “Seismic Hazards”, focuses on data pertaining to seismic hazard areas that are subject to high risk of damage due to earthquakes. The data was collected under the King County Sensitive Areas Ordinance (SOA) in order to raise awareness of the issue due to the many residents and businesses occupying the areas impacted. This data records areas with soil liquefaction which occurs when consistent earthquakes occur in the same area  causing soils to lose their strength, turning soil into almost a liquid like material. These hazardous areas can lead to structural damage, landslides and geographical issues that prevent residents from living in safety.',
             location: {
-                center: [-121.93090, 47.43191],
+                center:[-121.86109, 47.43587],
                 zoom: 9.8,
                 pitch: 65,
                 bearing: -43.2,
@@ -111,14 +111,9 @@ var config = {
             hidden: false,
             interactive: true,
             title: 'Liquefaction: Seismic Hazards and Earthquake Activity found',
-            image: './images/liquefaction-hazard-map.pdf.png',
             description: 'With liquefaction occuring in various areas through King County, the loss in soil stability due to earthquakes, poses various hazards for residents and anyone within King County. The damage that is followed by earthquake shaking affects roads, infrastructure, homes and anything else that lies within the seismic hazard areas including populations residing there. There is a current King County Regional Hazard Mitigation Plan that helps track down seismic hazard areas and is in the process of addressing the risks. This plan has also helped develop strategies to enhance resilience in these areas, getting rid of vulnerabilities in areas impacted by soil liquefaction from earthquakes. Using the map and the visuals to understand policies, seismic activity and recent earthquakes these can help us prepare for future earthquake impacts and take the correct measures to help save our communities.',
-            location: {
-                center: [-121.88008, 47.47291],
-                zoom: 9,
-                pitch: 0,
-                bearing: 0
-            },
+            legend: true,
+            image: './images/liquefaction-hazard-map.pdf.png',
             mapAnimation: 'flyTo',
             rotateAnimation: false,
             callback: '',
@@ -141,7 +136,7 @@ var config = {
         },
         {
             id: 'fifth-chapter',
-            alignment: 'left',
+            alignment: 'right',
             hidden: false,
             interactive: true,
             title: 'Living in a Seismic Area',
