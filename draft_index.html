@@ -405,13 +405,27 @@ map.on("load", function() {
             'circle-stroke-color': 'black'
         }
     });
+    
     map.on('click', 'earthquakes-layer', (event) => {
+        const properties = event.features[0].properties;
+        const date = new Date(properties.time);
+        const formattedDate = date.toLocaleString();
+
         new mapboxgl.Popup()
         .setLngLat(event.features[0].geometry.coordinates)
-        .setHTML(`<strong>Magnitutde:</strong>${event.features[0].properties.mag}`)
+        .setHTML(`<strong>Magnitutde:</strong>${event.features[0].properties.mag}<br>
+                  <strong>Place:</strong>${event.features[0].properties.place}<br>
+                  <strong>Time:</strong>${formattedDate}`)
         .addTo(map);
     });
 
+    map.on('mouseenter', 'earthquakes-layer', () => {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'earthquakes-layer', () => {
+        map.getCanvas().style.cursor = '';
+    });
     map.addLayer({
         'id': 'seismic-layer',
         'type': 'fill',
