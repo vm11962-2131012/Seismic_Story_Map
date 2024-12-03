@@ -79,6 +79,7 @@ var config = {
             title: 'Earthquakes in Seismic Hazard Areas',
             image: './images/earthquakecrack.jpg',
             description: 'Next we look at some recent seismic activity recorded in King County. Here we have a map of King County with dots representing recorded seismic activity. The live earthquake data is sourced from the United States Geological Survey (USGS), which tracks seismic activity in real-time and updates every minute to reflect earthquakes recorded within the past 30 days. Looking at this map we can see mostly smaller earthquakes of magnitude 3.0 and below spread out across the county. Multiple small earthquakes hitting the same spots over time can still create danger for people and wildlife in those areas as small earthquakes can still create great shaking.',
+            legend: true,
             location: {
                 center: [-122.03322, 47.46372],
                 zoom: 9.8,
@@ -112,7 +113,6 @@ var config = {
             interactive: true,
             title: 'Liquefaction: Seismic Hazards and Earthquake Activity found',
             description: 'With liquefaction occuring in various areas through King County, the loss in soil stability due to earthquakes, poses various hazards for residents and anyone within King County. The damage that is followed by earthquake shaking affects roads, infrastructure, homes and anything else that lies within the seismic hazard areas including populations residing there. There is a current King County Regional Hazard Mitigation Plan that helps track down seismic hazard areas and is in the process of addressing the risks. This plan has also helped develop strategies to enhance resilience in these areas, getting rid of vulnerabilities in areas impacted by soil liquefaction from earthquakes. Using the map and the visuals to understand policies, seismic activity and recent earthquakes these can help us prepare for future earthquake impacts and take the correct measures to help save our communities.',
-            legend: true,
             image: './images/liquefaction-hazard-map.pdf.png',
             mapAnimation: 'flyTo',
             rotateAnimation: false,

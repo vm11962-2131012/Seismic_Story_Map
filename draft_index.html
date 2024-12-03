@@ -130,6 +130,35 @@
             touch-action: unset;
         }
 
+        .legend-div {
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0 0 0 0.1);
+            line-height: 18px;
+            height: 150px;
+            margin-bottom: 40px;
+            width: 150px;
+            top: 20px;
+            right: 20px;
+            background: #FFFFFF;
+            border-style: solid;
+            border-color: #444;
+            margin-right: 20px;
+            z-index: 5;
+            position: fixed;
+        }
+
+        #legend-item {
+            padding:1px;
+        }
+
+        .legend-key {
+            display: inline-block;
+            border-radius: 20%;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+        }
+
         </style>
 </head>
 <body>
@@ -219,6 +248,28 @@ config.chapters.forEach((record, idx) => {
         chapter.appendChild(title);
     }
 
+    if (record.legend) {
+        const legendE1 = document.createElement('div');
+        legendE1.className = 'legend-div';
+        legendE1.innterHTML = '<b>Magnitude Size<b>';
+            const layers = ['mag ≤ 2', 'mag ≤ 4', 'mag ≤ 6', 'mag ≤ 8', 'mag > 8'];
+            const colors = ["#fff7ec", "#fdd49e", "#fc8d59", "#d7301f", "#7f0000"];
+            layers.forEach((layer, i) => {
+                const color = colors[i];
+                const item = document.createElement('div');
+                item.id = 'legend-item';
+                const key = document.createElement('span');
+                key.className = 'legend-key';
+                key.style.backgroundColor = color;
+                const value = document.createElement('span');
+                value.innerHTML = `${layer}`;
+                item.appendChild(key);
+                item.appendChild(value);
+                legendE1.appendChild(item);
+                chapter.appendChild(legendE1);
+            });
+        }
+
     if (record.image) {
         var image = new Image();
         image.src = record.image;
@@ -286,10 +337,10 @@ var map = new mapboxgl.Map({
 
 if (config.inset) {
  var insetMap = new mapboxgl.Map({
-    container: 'mapInset', 
-    style: 'mapbox://styles/mapbox/dark-v10', 
+    container: 'mapInset',
+    style: 'mapbox://styles/mapbox/dark-v10',
     center: config.chapters[0].location.center,
-    zoom: 3, 
+    zoom: 3,
     hash: false,
     interactive: false,
     attributionControl: true,
@@ -338,7 +389,7 @@ map.on("load", function() {
     map.addSource('cities', {
         type: 'geojson',
         data: 'data/world-cities.geojson'
-    }); 
+    });
 
     map.addLayer({
         'id': 'city-layer',
@@ -368,7 +419,7 @@ map.on("load", function() {
     map.addSource('recent-earthquake', {
         type: 'geojson',
         data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson'
-    }); 
+    });
 
     map.addLayer({
         'id': 'earthquakes-layer',
@@ -448,7 +499,7 @@ map.on("load", function() {
             'line-color': '#F33400',
             'line-opacity' : 1
         }
-    }); 
+    });
 
     map.on('click', 'city-layer', (event) => {
         if (event.features.length > 0) {
@@ -481,7 +532,7 @@ map.on("load", function() {
     .onStepEnter(async response => {
         var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
         var chapter = config.chapters[current_chapter];
-        
+
         response.element.classList.add('active');
         map[chapter.mapAnimation || 'flyTo'](chapter.location);
 
@@ -588,10 +639,10 @@ function addInsetLayer(bounds) {
     insetMap.addLayer({
         'id': 'boundsLayer',
         'type': 'fill',
-        'source': 'boundsSource', 
+        'source': 'boundsSource',
         'layout': {},
         'paint': {
-            'fill-color': '#fff', 
+            'fill-color': '#fff',
             'fill-opacity': 0.2
         }
     });
