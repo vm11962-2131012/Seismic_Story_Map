@@ -9,6 +9,9 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://unpkg.com/intersection-observer@0.12.0/intersection-observer.js"></script>
     <script src="https://unpkg.com/scrollama"></script>
+    <script src="https://d3js.org/d3.v6.js"></script>
+
+
     <style>
         body {
             margin:0;
@@ -90,16 +93,15 @@
             margin: auto;
         }
         .light {
-            color: #444;
+            color: #C3D2DC;
             background-color: #fafafa;
         }
         .dark {
-            color: #fafafa;
-            background-color: #444;
+            color: #f6c177;
+            background-color: #313131ca;
         }
         .step {
             padding-bottom: 50vh;
-            /* margin-bottom: 10vh; */
             opacity: 0.25;
         }
         .step.active {
@@ -123,10 +125,38 @@
             }
         }
 
-        /* Fix issue on mobile browser where scroll breaks  */
         .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan,
         .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan .mapboxgl-canvas {
             touch-action: unset;
+        }
+
+        .legend-div {
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0 0 0 0.1);
+            line-height: 18px;
+            height: 150px;
+            margin-bottom: 40px;
+            width: 150px;
+            top: 20px;
+            right: 20px;
+            background: #FFFFFF;
+            border-style: solid;
+            border-color: #444;
+            margin-right: 20px;
+            z-index: 5;
+            position: fixed;
+        }
+
+        #legend-item {
+            padding:1px;
+        }
+
+        .legend-key {
+            display: inline-block;
+            border-radius: 20%;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
         }
 
         </style>
@@ -139,6 +169,9 @@
 
 <script src="./config.js"></script>
 <script>
+
+
+
 var initLoad = true;
 var layerTypes = {
     'fill': ['fill-opacity'],
@@ -215,6 +248,28 @@ config.chapters.forEach((record, idx) => {
         chapter.appendChild(title);
     }
 
+    if (record.legend) {
+        const legendE1 = document.createElement('div');
+        legendE1.className = 'legend-div';
+        legendE1.innterHTML = '<b>Magnitude Size<b>';
+            const layers = ['mag ≤ 2', 'mag ≤ 4', 'mag ≤ 6', 'mag ≤ 8', 'mag > 8'];
+            const colors = ["#fff7ec", "#fdd49e", "#fc8d59", "#d7301f", "#7f0000"];
+            layers.forEach((layer, i) => {
+                const color = colors[i];
+                const item = document.createElement('div');
+                item.id = 'legend-item';
+                const key = document.createElement('span');
+                key.className = 'legend-key';
+                key.style.backgroundColor = color;
+                const value = document.createElement('span');
+                value.innerHTML = `${layer}`;
+                item.appendChild(key);
+                item.appendChild(value);
+                legendE1.appendChild(item);
+                chapter.appendChild(legendE1);
+            });
+        }
+
     if (record.image) {
         var image = new Image();
         image.src = record.image;
@@ -235,7 +290,7 @@ config.chapters.forEach((record, idx) => {
 
     chapter.classList.add(config.theme);
     container.appendChild(chapter);
-    container.classList.add(alignments[record.alignment] || 'centered');
+    container.classList.add(alignments[record.alignment] || 'center');
     if (record.hidden) {
         container.classList.add('hidden');
     }
@@ -280,20 +335,15 @@ var map = new mapboxgl.Map({
     projection: config.projection
 });
 
-// Create a inset map if enabled in config.js
 if (config.inset) {
  var insetMap = new mapboxgl.Map({
-    container: 'mapInset', // container id
-    style: 'mapbox://styles/mapbox/dark-v10', //hosted style id
+    container: 'mapInset',
+    style: 'mapbox://styles/mapbox/dark-v10',
     center: config.chapters[0].location.center,
-    // Hardcode above center value if you want insetMap to be static.
-    zoom: 3, // starting zoom
+    zoom: 3,
     hash: false,
     interactive: false,
-    attributionControl: false,
-    //Future: Once official mapbox-gl-js has globe view enabled,
-    //insetmap can be a globe with the following parameter.
-    //projection: 'globe'
+    attributionControl: true,
   });
 }
 
@@ -302,7 +352,6 @@ if (config.showMarkers) {
     marker.setLngLat(config.chapters[0].location.center).addTo(map);
 }
 
-// instantiate the scrollama
 var scroller = scrollama();
 
 
@@ -314,10 +363,8 @@ map.on("load", function() {
             'tileSize': 512,
             'maxzoom': 14
         });
-        // add the DEM source as a terrain layer with exaggerated height
         map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
 
-        // add a sky layer that will show when the map is highly pitched
         map.addLayer({
             'id': 'sky',
             'type': 'sky',
@@ -328,24 +375,154 @@ map.on("load", function() {
             }
         });
     };
-    
+
+    map.on('style.load', () => {
+        map.addSource('mapbox-dem', {
+            'type': 'raster-dem',
+            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            'tileSize': 512,
+            'maxzoom': 14
+        });
+        map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+    });
+
+    map.addSource('cities', {
+        type: 'geojson',
+        data: 'data/world-cities.geojson'
+    });
+
+    map.addLayer({
+        'id': 'city-layer',
+        'type': 'circle',
+        'source': 'cities',
+        'paint': {
+            'circle-radius': 6,
+            'circle-color': '#FEFF79',
+            'circle-stroke-color': '#FDD22A',
+            'circle-opacity' : 1
+        }
+    });
+
+    map.addLayer({
+        'id': 'city-line-layer',
+        'type': 'line',
+        'source': {
+            'type': 'geojson',
+            'data': 'data/Cities_and_Unincorporated_King_County___city_kc_area.geojson'
+        },
+        'paint': {
+            'line-color': '#F33400',
+            'line-opacity' : 1
+        }
+    });
+
     map.addSource('recent-earthquake', {
         type: 'geojson',
-        data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson'
+        data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson'
     });
 
     map.addLayer({
         'id': 'earthquakes-layer',
         'type': 'circle',
-        'source': 'recent-earthquake'
+        'source': 'recent-earthquake',
+        'paint': {
+            'circle-radius': ['interpolate', ['linear'], ['get', 'mag'],
+            1, 0.7,
+            1.5, 2,
+            2, 4,
+            2.5, 5,
+            3, 6,
+            3.5, 7,
+            4.5, 9,
+            6.5, 15,
+            8.5, 17,
+            10.5, 20],
+            'circle-stroke-width': 1,
+            'circle-color': ['interpolate', ['linear'], ['get', 'mag'],
+            1, '#fff7ec',
+            1.5, '#fee8c8',
+            2, '#fdd49e',
+            2.5, '#fdbb84',
+            3, '#fc8d59',
+            3.5, '#ef6548',
+            4.5, '#d7301f',
+            6.5, '#b30000',
+            8.5, '#7f0000',
+            10.5, '#000'],
+            'circle-stroke-color': 'black'
+        }
     });
 
+    map.on('click', 'earthquakes-layer', (event) => {
+        const properties = event.features[0].properties;
+        const date = new Date(properties.time);
+        const formattedDate = date.toLocaleString();
 
-    // As the map moves, grab and update bounds in inset map.
+        new mapboxgl.Popup()
+        .setLngLat(event.features[0].geometry.coordinates)
+        .setHTML(`<strong>Magnitutde:</strong> ${event.features[0].properties.mag}<br>
+                  <strong>Place:</strong> ${event.features[0].properties.place}<br>
+                  <strong>Time:</strong> ${formattedDate}`)
+        .addTo(map);
+    });
+
+    map.on('mouseenter', 'earthquakes-layer', () => {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'earthquakes-layer', () => {
+        map.getCanvas().style.cursor = '';
+    });
+
+    map.addLayer({
+        'id': 'seismic-layer',
+        'type': 'fill',
+        'source': {
+            'type': 'geojson',
+            'data': 'https://gisdata.kingcounty.gov/arcgis/rest/services/OpenDataPortal/enviro___base/MapServer/298/query?outFields=*&where=1%3D1&f=geojson'
+        },
+        'paint': {
+            'fill-color': '#ff5c33',
+            'fill-outline-color': '#9E0F0F',
+            'fill-opacity': 1
+        }
+    });
+
+    map.addLayer({
+        'id': 'WA-layer',
+        'type': 'line',
+        'source': {
+            'type': 'geojson',
+            'data': 'data/WAcounties.geojson'
+        },
+        'paint': {
+            'line-color': '#F33400',
+            'line-opacity' : 1
+        }
+    });
+
+    map.on('click', 'city-layer', (event) => {
+        if (event.features.length > 0) {
+            const feature = event.features[0];
+            new mapboxgl.Popup()
+            .setLngLat(event.lngLat)
+            .setHTML(`<strong>City:</strong> ${event.features[0].properties.city}<br>
+                      <strong>Population:</strong> ${event.features[0].properties.population}`)
+            .addTo(map);
+        }
+    });
+
+    map.on('mouseenter', 'city-layer', () => {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'city-layer', () => {
+        map.getCanvas().style.cursor = '';
+    });
+
     if (config.inset) {
     map.on('move', getInsetBounds);
     }
-    // setup the instance, pass callback functions
     scroller
     .setup({
         step: '.step',
@@ -355,13 +532,10 @@ map.on("load", function() {
     .onStepEnter(async response => {
         var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
         var chapter = config.chapters[current_chapter];
-        
+
         response.element.classList.add('active');
         map[chapter.mapAnimation || 'flyTo'](chapter.location);
 
-        // Incase you do not want to have a dynamic inset map,
-        // rather want to keep it a static view but still change the
-        // bbox as main map move: comment out the below if section.
         if (config.inset) {
           if (chapter.location.zoom < 5) {
             insetMap.flyTo({center: chapter.location.center, zoom: 0});
@@ -410,10 +584,8 @@ map.on("load", function() {
     }
 });
 
-//Helper functions for insetmap
 function getInsetBounds() {
             let bounds = map.getBounds();
-
             let boundsJson = {
                 "type": "FeatureCollection",
                 "features": [{
@@ -467,14 +639,14 @@ function addInsetLayer(bounds) {
     insetMap.addLayer({
         'id': 'boundsLayer',
         'type': 'fill',
-        'source': 'boundsSource', // reference the data source
+        'source': 'boundsSource',
         'layout': {},
         'paint': {
-            'fill-color': '#fff', // blue color fill
+            'fill-color': '#fff',
             'fill-opacity': 0.2
         }
     });
-    // // Add a black outline around the polygon.
+
     insetMap.addLayer({
         'id': 'outlineLayer',
         'type': 'line',
