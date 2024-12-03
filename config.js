@@ -10,7 +10,7 @@ var config = {
     title: 'Seismic Hazards and Recent Earthquake activity',
     subtitle: 'A storymap exploring liquefaction threats with recent earthquakes.',
     byline: 'By a Victoria Martinez and Yi Hong Huang',
-    footer: 'Source: source citations, etc. <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
+    footer: 'Source: USGS, King County GIS Open Data, etc. <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
     chapters: [
         {
             id: 'slug-style-id',
@@ -48,7 +48,7 @@ var config = {
             id: 'second-identifier',
             alignment: 'right',
             hidden: false,
-            title: 'Seismic Activity',
+            title: 'Seismic Activity (1997-2013)',
             image: './images/screenshot-2023-04-17-083100-1024x597.png',
             description: 'Due to our topic surrounding the environmental hazards in King County our first dataset, “Seismic Hazards”, focuses on data pertaining to seismic hazard areas that are subject to high risk of damage due to earthquakes. The data was collected under the King County Sensitive Areas Ordinance (SOA) in order to raise awareness of the issue due to the many residents and businesses occupying the areas impacted. This data records areas with soil liquefaction which occurs when consistent earthquakes occur in the same area  causing soils to lose their strength, turning soil into almost a liquid like material. These hazardous areas can lead to structural damage, landslides and geographical issues that prevent residents from living in safety.',
             location: {
