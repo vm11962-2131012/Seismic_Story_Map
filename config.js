@@ -34,10 +34,10 @@ var config = {
                     opacity: 1,
                  }, {
                     layer: 'earthquakes-layer',
-                    opacity: 1,
+                    opacity: 0,
                  }, {
                     layer: 'seismic-layer',
-                    opacity: 1,
+                    opacity: 0,
                  }, {
                     layer: 'city-line-layer',
                     opacity: 1,
