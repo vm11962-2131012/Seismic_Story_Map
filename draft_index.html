@@ -1,669 +1,172 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='utf-8' />
-    <title>Mapbox Storytelling</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/mapbox/assembly/publisher-staging/src/svgs/mapbox.svg">
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet' />
-    <script src="https://unpkg.com/intersection-observer@0.12.0/intersection-observer.js"></script>
-    <script src="https://unpkg.com/scrollama"></script>
-    <script src="https://d3js.org/d3.v6.js"></script>
-
-
-    <style>
-        body {
-            margin:0;
-            padding:0;
-            font-family: sans-serif;
-        }
-        a, a:hover, a:visited {
-            color: #0071bc;
-        }
-        #map {
-            top:0;
-            height: 100vh;
-            width:100vw;
-            position: fixed;
-        }
-        #mapInset {
-            bottom:50px;
-            right:30px;
-            height: 180px;
-            width:250px;
-            max-width:100%;
-            position: fixed;
-            z-index: 1;
-            opacity: 1;
-            transition: opacity 0.5s ease-in-out;
-            pointer-events: none;
-        }
-        #mapInset .mapboxgl-ctrl-bottom-left{
-            display: none;
-        }
-        @media (max-width: 500px) {
-            #mapInset {
-                display: none;
-            }
-        }
-        #header {
-            margin: auto;
-            width: 100%;
-            position: relative;
-            z-index: 5;
-        }
-        #header h1, #header h2, #header p {
-            margin: 0;
-            padding: 2vh 2vw;
-            text-align: center;
-        }
-        #footer {
-            width: 100%;
-            min-height: 5vh;
-            padding-top: 2vh;
-            padding-bottom: 2vh;
-            text-align: center;
-            line-height: 25px;
-            font-size: 13px;
-            position: relative;
-            z-index: 5;
-        }
-        #features {
-            padding-top: 10vh;
-            padding-bottom: 10vh;
-        }
-        .hidden {
-            visibility: hidden;
-        }
-        .centered {
-            width: 50vw;
-            margin: 0 auto;
-        }
-        .lefty {
-            width: 33vw;
-            margin-left: 5vw;
-        }
-        .righty {
-            width: 33vw;
-            margin-left: 62vw;
-        }
-        .fully {
-            width: 100%;
-            margin: auto;
-        }
-        .light {
-            color: #C3D2DC;
-            background-color: #fafafa;
-        }
-        .dark {
-            color: #f6c177;
-            background-color: #313131ca;
-        }
-        .step {
-            padding-bottom: 50vh;
-            opacity: 0.25;
-        }
-        .step.active {
-            opacity: 0.9;
-        }
-
-        .step div {
-            padding:  25px 50px;
-            line-height: 25px;
-            font-size: 13px;
-        }
-
-        .step img {
-            width: 100%;
-        }
-
-        @media (max-width: 750px) {
-            .centered, .lefty, .righty, .fully {
-                width: 90vw;
-                margin: 0 auto;
-            }
-        }
-
-        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan,
-        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan .mapboxgl-canvas {
-            touch-action: unset;
-        }
-
-        .legend-div {
-            padding: 10px;
-            box-shadow: 0 1px 2px rgba(0 0 0 0.1);
-            line-height: 18px;
-            height: 150px;
-            margin-bottom: 40px;
-            width: 150px;
-            top: 20px;
-            right: 20px;
-            background: #FFFFFF;
-            border-style: solid;
-            border-color: #444;
-            margin-right: 20px;
-            z-index: 5;
-            position: fixed;
-        }
-
-        #legend-item {
-            padding:1px;
-        }
-
-        .legend-key {
-            display: inline-block;
-            border-radius: 20%;
-            width: 10px;
-            height: 10px;
-            margin-right: 5px;
-        }
-
-        </style>
-</head>
-<body>
-
-<div id="map"></div>
-<div id="mapInset"></div>
-<div id="story"></div>
-
-<script src="./config.js"></script>
-<script>
-
-
-
-var initLoad = true;
-var layerTypes = {
-    'fill': ['fill-opacity'],
-    'line': ['line-opacity'],
-    'circle': ['circle-opacity', 'circle-stroke-opacity'],
-    'symbol': ['icon-opacity', 'text-opacity'],
-    'raster': ['raster-opacity'],
-    'fill-extrusion': ['fill-extrusion-opacity'],
-    'heatmap': ['heatmap-opacity']
-}
-
-var alignments = {
-    'left': 'lefty',
-    'center': 'centered',
-    'right': 'righty',
-    'full': 'fully'
-}
-
-function getLayerPaintType(layer) {
-    var layerType = map.getLayer(layer).type;
-    return layerTypes[layerType];
-}
-
-function setLayerOpacity(layer) {
-    var paintProps = getLayerPaintType(layer.layer);
-    paintProps.forEach(function(prop) {
-        var options = {};
-        if (layer.duration) {
-            var transitionProp = prop + "-transition";
-            options = { "duration": layer.duration };
-            map.setPaintProperty(layer.layer, transitionProp, options);
-        }
-        map.setPaintProperty(layer.layer, prop, layer.opacity, options);
-    });
-}
-
-var story = document.getElementById('story');
-var features = document.createElement('div');
-features.setAttribute('id', 'features');
-
-var header = document.createElement('div');
-
-if (config.title) {
-    var titleText = document.createElement('h1');
-    titleText.innerText = config.title;
-    header.appendChild(titleText);
-}
-
-if (config.subtitle) {
-    var subtitleText = document.createElement('h2');
-    subtitleText.innerText = config.subtitle;
-    header.appendChild(subtitleText);
-}
-
-if (config.byline) {
-    var bylineText = document.createElement('p');
-    bylineText.innerText = config.byline;
-    header.appendChild(bylineText);
-}
-
-if (header.innerText.length > 0) {
-    header.classList.add(config.theme);
-    header.setAttribute('id', 'header');
-    story.appendChild(header);
-}
-
-config.chapters.forEach((record, idx) => {
-    var container = document.createElement('div');
-    var chapter = document.createElement('div');
-
-    if (record.title) {
-        var title = document.createElement('h3');
-        title.innerText = record.title;
-        chapter.appendChild(title);
-    }
-
-    if (record.legend) {
-        const legendE1 = document.createElement('div');
-        legendE1.className = 'legend-div';
-        legendE1.innterHTML = '<b>Magnitude Size<b>';
-            const layers = ['mag ≤ 2', 'mag ≤ 4', 'mag ≤ 6', 'mag ≤ 8', 'mag > 8'];
-            const colors = ["#fff7ec", "#fdd49e", "#fc8d59", "#d7301f", "#7f0000"];
-            layers.forEach((layer, i) => {
-                const color = colors[i];
-                const item = document.createElement('div');
-                item.id = 'legend-item';
-                const key = document.createElement('span');
-                key.className = 'legend-key';
-                key.style.backgroundColor = color;
-                const value = document.createElement('span');
-                value.innerHTML = `${layer}`;
-                item.appendChild(key);
-                item.appendChild(value);
-                legendE1.appendChild(item);
-                chapter.appendChild(legendE1);
-            });
-        }
-
-    if (record.image) {
-        var image = new Image();
-        image.src = record.image;
-        chapter.appendChild(image);
-    }
-
-    if (record.description) {
-        var story = document.createElement('p');
-        story.innerHTML = record.description;
-        chapter.appendChild(story);
-    }
-
-    container.setAttribute('id', record.id);
-    container.classList.add('step');
-    if (idx === 0) {
-        container.classList.add('active');
-    }
-
-    chapter.classList.add(config.theme);
-    container.appendChild(chapter);
-    container.classList.add(alignments[record.alignment] || 'center');
-    if (record.hidden) {
-        container.classList.add('hidden');
-    }
-    features.appendChild(container);
-});
-
-story.appendChild(features);
-
-var footer = document.createElement('div');
-
-if (config.footer) {
-    var footerText = document.createElement('p');
-    footerText.innerHTML = config.footer;
-    footer.appendChild(footerText);
-}
-
-if (footer.innerText.length > 0) {
-    footer.classList.add(config.theme);
-    footer.setAttribute('id', 'footer');
-    story.appendChild(footer);
-}
-
-mapboxgl.accessToken = config.accessToken;
-
-const transformRequest = (url) => {
-    const hasQuery = url.indexOf("?") !== -1;
-    const suffix = hasQuery ? "&pluginName=scrollytellingV2" : "?pluginName=scrollytellingV2";
-    return {
-      url: url + suffix
-    }
-}
-
-var map = new mapboxgl.Map({
-    container: 'map',
-    style: config.style,
-    center: config.chapters[0].location.center,
-    zoom: config.chapters[0].location.zoom,
-    bearing: config.chapters[0].location.bearing,
-    pitch: config.chapters[0].location.pitch,
-    interactive: false,
-    transformRequest: transformRequest,
-    projection: config.projection
-});
-
-if (config.inset) {
- var insetMap = new mapboxgl.Map({
-    container: 'mapInset',
-    style: 'mapbox://styles/mapbox/dark-v10',
-    center: config.chapters[0].location.center,
-    zoom: 3,
-    hash: false,
-    interactive: false,
-    attributionControl: true,
-  });
-}
-
-if (config.showMarkers) {
-    var marker = new mapboxgl.Marker({ color: config.markerColor });
-    marker.setLngLat(config.chapters[0].location.center).addTo(map);
-}
-
-var scroller = scrollama();
-
-
-map.on("load", function() {
-    if (config.use3dTerrain) {
-        map.addSource('mapbox-dem', {
-            'type': 'raster-dem',
-            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
-            'tileSize': 512,
-            'maxzoom': 14
-        });
-        map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
-
-        map.addLayer({
-            'id': 'sky',
-            'type': 'sky',
-            'paint': {
-                'sky-type': 'atmosphere',
-                'sky-atmosphere-sun': [0.0, 0.0],
-                'sky-atmosphere-sun-intensity': 15
-            }
-        });
-    };
-
-    map.on('style.load', () => {
-        map.addSource('mapbox-dem', {
-            'type': 'raster-dem',
-            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
-            'tileSize': 512,
-            'maxzoom': 14
-        });
-        map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
-    });
-
-    map.addSource('cities', {
-        type: 'geojson',
-        data: 'data/world-cities.geojson'
-    });
-
-    map.addLayer({
-        'id': 'city-layer',
-        'type': 'circle',
-        'source': 'cities',
-        'paint': {
-            'circle-radius': 6,
-            'circle-color': '#FEFF79',
-            'circle-stroke-color': '#FDD22A',
-            'circle-opacity' : 1
-        }
-    });
-
-    map.addLayer({
-        'id': 'city-line-layer',
-        'type': 'line',
-        'source': {
-            'type': 'geojson',
-            'data': 'data/Cities_and_Unincorporated_King_County___city_kc_area.geojson'
+var config = {
+    style: 'mapbox://styles/mapbox/streets-v11',
+    accessToken: 'pk.eyJ1Ijoidm0xMTk2MiIsImEiOiJjbTFqbHFsNWwxMGxxMmlweXdjYm9qZnNoIn0.Ca6Vt9ybed8zD4ZopE358Q',
+    showMarkers: false,
+    markerColor: '#3FB1CE',
+    inset: true,
+    theme: 'dark',
+    use3dTerrain: true, // map set to 3d
+    auto: false,
+    title: 'Seismic Hazards and Recent Earthquake activity',
+    subtitle: 'A storymap exploring liquefaction threats with recent earthquakes.',
+    byline: 'By a Victoria Martinez and Yi Hong Huang',
+    footer: 'Source: USGS, King County GIS Open Data, etc. <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
+    chapters: [
+        {
+            id: 'slug-style-id',
+            alignment: 'left',
+            hidden: false,
+            title: 'Earthquakes and King County',
+            image: './images/kingcountyphoto.jpg',
+            description: 'King County is located in the heart of the Puget Sound region in Washington state. It is the most populous county in the state with over 2.2 million residents calling it home. King County covers a total of 2,130 square miles of land across cities like Seattle, Bellevue, Tacoma, and Renton. King County features urban centers, lush forests, scenic mountains, and expansive waterways. This vibrant area has become one of the fastest growing cities in the world. King County also lies on top of the Cascadia Subduction Zone and many other faults. The Cascadia Subduction Zone is a major tectonic plate boundary where the Juan de Fuca Plate subducts beneath the North American Plate, posing risk of megathrust earthquakes. King County also sits criss-crossed on top of the Seattle Fault and South Whidbey Island Fault which are capable of producing smaller earthquakes. The Cascadia Subduction Zone is a part of the Pacific Ring of Fire, parts of the Pacific Ocean where high levels of seismic and volcanic activity are present making it one of the most geologically active regions in the world.',
+            location: {
+                center: [-122.34518, 47.67625],
+                zoom: 9.5,
+                pitch: 50,
+                bearing: 0
+            },
+            mapAnimation: 'flyTo',
+            rotateAnimation: false,
+            callback: '',
+            onChapterEnter: [
+                {
+                    layer: 'earthquakes-layer',
+                    opacity: 0,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 0,
+               },
+            ],
+            onChapterExit: [
+                // {
+                //     layer: 'layer-name',
+                //     opacity: 0
+                // }
+            ]
         },
-        'paint': {
-            'line-color': '#F33400',
-            'line-opacity' : 1
-        }
-    });
-
-    map.addSource('recent-earthquake', {
-        type: 'geojson',
-        data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson'
-    });
-
-    map.addLayer({
-        'id': 'earthquakes-layer',
-        'type': 'circle',
-        'source': 'recent-earthquake',
-        'paint': {
-            'circle-radius': ['interpolate', ['linear'], ['get', 'mag'],
-            1, 0.7,
-            1.5, 2,
-            2, 4,
-            2.5, 5,
-            3, 6,
-            3.5, 7,
-            4.5, 9,
-            6.5, 15,
-            8.5, 17,
-            10.5, 20],
-            'circle-stroke-width': 1,
-            'circle-color': ['interpolate', ['linear'], ['get', 'mag'],
-            1, '#fff7ec',
-            1.5, '#fee8c8',
-            2, '#fdd49e',
-            2.5, '#fdbb84',
-            3, '#fc8d59',
-            3.5, '#ef6548',
-            4.5, '#d7301f',
-            6.5, '#b30000',
-            8.5, '#7f0000',
-            10.5, '#000'],
-            'circle-stroke-color': 'black'
-        }
-    });
-
-    map.on('click', 'earthquakes-layer', (event) => {
-        const properties = event.features[0].properties;
-        const date = new Date(properties.time);
-        const formattedDate = date.toLocaleString();
-
-        new mapboxgl.Popup()
-        .setLngLat(event.features[0].geometry.coordinates)
-        .setHTML(`<strong>Magnitutde:</strong> ${event.features[0].properties.mag}<br>
-                  <strong>Place:</strong> ${event.features[0].properties.place}<br>
-                  <strong>Time:</strong> ${formattedDate}`)
-        .addTo(map);
-    });
-
-    map.on('mouseenter', 'earthquakes-layer', () => {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    map.on('mouseleave', 'earthquakes-layer', () => {
-        map.getCanvas().style.cursor = '';
-    });
-
-    map.addLayer({
-        'id': 'seismic-layer',
-        'type': 'fill',
-        'source': {
-            'type': 'geojson',
-            'data': 'https://gisdata.kingcounty.gov/arcgis/rest/services/OpenDataPortal/enviro___base/MapServer/298/query?outFields=*&where=1%3D1&f=geojson'
+        {
+            id: 'second-identifier',
+            alignment: 'right',
+            hidden: false,
+            title: 'Seismic Activity (1997-2013)',
+            image: './images/screenshot-2023-04-17-083100-1024x597.png',
+            description: 'Due to our topic surrounding the environmental hazards in King County our first dataset, “Seismic Hazards”, focuses on data pertaining to seismic hazard areas that are subject to high risk of damage due to earthquakes. The data was collected under the King County Sensitive Areas Ordinance (SOA) in order to raise awareness of the issue due to the many residents and businesses occupying the areas impacted. This data records areas with soil liquefaction which occurs when consistent earthquakes occur in the same area  causing soils to lose their strength, turning soil into almost a liquid like material. These hazardous areas can lead to structural damage, landslides and geographical issues that prevent residents from living in safety.',
+            location: {
+                center:[-121.86109, 47.43587],
+                zoom: 9.8,
+                pitch: 65,
+                bearing: -43.2,
+            },
+            mapAnimation: 'flyTo',
+            rotateAnimation: true,
+            callback: '',
+            onChapterEnter: [
+                {
+                   layer: 'seismic-layer',
+                   opacity: 1,
+               }
+            ],
+            onChapterExit: [
+                {
+                    layer: 'seismic-layer',
+                    opacity: 0,
+                }
+            ]
         },
-        'paint': {
-            'fill-color': '#ff5c33',
-            'fill-outline-color': '#9E0F0F',
-            'fill-opacity': 1
-        }
-    });
-
-    map.addLayer({
-        'id': 'WA-layer',
-        'type': 'line',
-        'source': {
-            'type': 'geojson',
-            'data': 'data/WAcounties.geojson'
+        {
+            id: 'third-chapter',
+            alignment: 'left',
+            title: 'Earthquakes in Seismic Hazard Areas',
+            image: './images/earthquakecrack.jpg',
+            description: 'Next we look at some recent seismic activity recorded in King County. Here we have a map of King County with dots representing recorded seismic activity. The live earthquake data is sourced from the United States Geological Survey (USGS), which tracks seismic activity in real-time and updates every minute to reflect earthquakes recorded within the past 30 days. Looking at this map we can see mostly smaller earthquakes of magnitude 3.0 and below spread out across the county. Multiple small earthquakes hitting the same spots over time can still create danger for people and wildlife in those areas as small earthquakes can still create great shaking.',
+            legend: true,
+            location: {
+                center: [-122.03322, 47.46372],
+                zoom: 9.8,
+                pitch: 65,
+                bearing: 43.2
+            },
+            mapAnimation: 'easeTo',
+            rotateAnimation: true,
+            callback: '',
+            onChapterEnter: [
+                {
+                    layer: 'earthquakes-layer',
+                    opacity: 1,
+                 }, {
+                    layer: 'seismic-layer',
+                    opacity: 0,
+                 }, {
+                    layer: 'city-layer',
+                    opacity: 0,
+                 }, {
+                    layer: 'city-line-layer',
+                    opacity: 0,
+                 },
+            ],
+            onChapterExit: []
         },
-        'paint': {
-            'line-color': '#F33400',
-            'line-opacity' : 1
+        {
+            id: 'fourth-chapter',
+            alignment: 'right',
+            hidden: false,
+            interactive: true,
+            title: 'Liquefaction: Seismic Hazards and Earthquake Activity found',
+            description: 'With liquefaction occuring in various areas through King County, the loss in soil stability due to earthquakes, poses various hazards for residents and anyone within King County. The damage that is followed by earthquake shaking affects roads, infrastructure, homes and anything else that lies within the seismic hazard areas including populations residing there. There is a current King County Regional Hazard Mitigation Plan that helps track down seismic hazard areas and is in the process of addressing the risks. This plan has also helped develop strategies to enhance resilience in these areas, getting rid of vulnerabilities in areas impacted by soil liquefaction from earthquakes. Using the map and the visuals to understand policies, seismic activity and recent earthquakes these can help us prepare for future earthquake impacts and take the correct measures to help save our communities.',
+            image: './images/liquefaction-hazard-map.pdf.png',
+            mapAnimation: 'flyTo',
+            rotateAnimation: false,
+            callback: '',
+            onChapterEnter: [
+                {
+                   layer: 'city-layer',
+                   opacity: 0,
+                }, {
+                   layer: 'earthquakes-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'city-line-layer',
+                   opacity: 1,
+                },
+            ],
+            onChapterExit: []
+        },
+        {
+            id: 'fifth-chapter',
+            alignment: 'right',
+            hidden: false,
+            interactive: true,
+            title: 'Living in a Seismic Area',
+            image: './images/infographic.jpeg',
+            description: 'After looking closely at where recent earthquakes happen in King County we can see Issaquah as an area of high risk as many small earthquakes happened recently on top of the liquefaction areas. The city itself is aware of these facts and has done emergency training with its Citizen Corp. In case of a major earthquake on the Cascadia Subduction Zone, the area will feel major shaking and some chimneys could break. The last time an earthquake impacted this region was the 2001 Nisqually Earthquake with a magnitude of 6.8 and it caused $1-4 billion dollars worth of damage. Living in an active seismic area poses many risks and people living in it should have emergency plans, secure heavy furniture, assemble disaster supply kits, and know their evacuation routes. Subscribing to local alerts and checking government websites are also a great way to stay updated.',
+            location: {
+                center: [-121.88008, 47.47291],
+                zoom: 9,
+                pitch: 0,
+                bearing: 0
+            },
+            mapAnimation: 'flyTo',
+            rotateAnimation: false,
+            callback: '',
+            onChapterEnter: [
+                {
+                   layer: 'city-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'earthquakes-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'seismic-layer',
+                   opacity: 1,
+                }, {
+                   layer: 'city-line-layer',
+                   opacity: 1,
+                },
+            ],
+            onChapterExit: []
         }
-    });
-
-    map.on('click', 'city-layer', (event) => {
-        if (event.features.length > 0) {
-            const feature = event.features[0];
-            new mapboxgl.Popup()
-            .setLngLat(event.lngLat)
-            .setHTML(`<strong>City:</strong> ${event.features[0].properties.city}<br>
-                      <strong>Population:</strong> ${event.features[0].properties.population}`)
-            .addTo(map);
-        }
-    });
-
-    map.on('mouseenter', 'city-layer', () => {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    map.on('mouseleave', 'city-layer', () => {
-        map.getCanvas().style.cursor = '';
-    });
-
-    if (config.inset) {
-    map.on('move', getInsetBounds);
-    }
-    scroller
-    .setup({
-        step: '.step',
-        offset: 0.5,
-        progress: true
-    })
-    .onStepEnter(async response => {
-        var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
-        var chapter = config.chapters[current_chapter];
-
-        response.element.classList.add('active');
-        map[chapter.mapAnimation || 'flyTo'](chapter.location);
-
-        if (config.inset) {
-          if (chapter.location.zoom < 5) {
-            insetMap.flyTo({center: chapter.location.center, zoom: 0});
-          }
-          else {
-            insetMap.flyTo({center: chapter.location.center, zoom: 3});
-          }
-        }
-        if (config.showMarkers) {
-            marker.setLngLat(chapter.location.center);
-        }
-        if (chapter.onChapterEnter.length > 0) {
-            chapter.onChapterEnter.forEach(setLayerOpacity);
-        }
-        if (chapter.callback) {
-            window[chapter.callback]();
-        }
-        if (chapter.rotateAnimation) {
-            map.once('moveend', () => {
-                const rotateNumber = map.getBearing();
-                map.rotateTo(rotateNumber + 180, {
-                    duration: 30000, easing: function (t) {
-                        return t;
-                    }
-                });
-            });
-        }
-        if (config.auto) {
-             var next_chapter = (current_chapter + 1) % config.chapters.length;
-             map.once('moveend', () => {
-                 document.querySelectorAll('[data-scrollama-index="' + next_chapter.toString() + '"]')[0].scrollIntoView();
-             });
-        }
-    })
-    .onStepExit(response => {
-        var chapter = config.chapters.find(chap => chap.id === response.element.id);
-        response.element.classList.remove('active');
-        if (chapter.onChapterExit.length > 0) {
-            chapter.onChapterExit.forEach(setLayerOpacity);
-        }
-    });
-
-
-    if (config.auto) {
-        document.querySelectorAll('[data-scrollama-index="0"]')[0].scrollIntoView();
-    }
-});
-
-function getInsetBounds() {
-            let bounds = map.getBounds();
-            let boundsJson = {
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "properties": {},
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [
-                            [
-                                [
-                                    bounds._sw.lng,
-                                    bounds._sw.lat
-                                ],
-                                [
-                                    bounds._ne.lng,
-                                    bounds._sw.lat
-                                ],
-                                [
-                                    bounds._ne.lng,
-                                    bounds._ne.lat
-                                ],
-                                [
-                                    bounds._sw.lng,
-                                    bounds._ne.lat
-                                ],
-                                [
-                                    bounds._sw.lng,
-                                    bounds._sw.lat
-                                ]
-                            ]
-                        ]
-                    }
-                }]
-            }
-
-            if (initLoad) {
-                addInsetLayer(boundsJson);
-                initLoad = false;
-            } else {
-                updateInsetLayer(boundsJson);
-            }
-
-        }
-
-function addInsetLayer(bounds) {
-    insetMap.addSource('boundsSource', {
-        'type': 'geojson',
-        'data': bounds
-    });
-
-    insetMap.addLayer({
-        'id': 'boundsLayer',
-        'type': 'fill',
-        'source': 'boundsSource',
-        'layout': {},
-        'paint': {
-            'fill-color': '#fff',
-            'fill-opacity': 0.2
-        }
-    });
-
-    insetMap.addLayer({
-        'id': 'outlineLayer',
-        'type': 'line',
-        'source': 'boundsSource',
-        'layout': {},
-        'paint': {
-            'line-color': '#000',
-            'line-width': 1
-        }
-    });
-}
-
-function updateInsetLayer(bounds) {
-    insetMap.getSource('boundsSource').setData(bounds);
-}
-
-</script>
-
-</body>
-</html>
+    ]
+};
