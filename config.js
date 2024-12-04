@@ -30,12 +30,18 @@ var config = {
             callback: '',
             onChapterEnter: [
                 {
+                    layer: 'city-layer',
+                    opacity: 1,
+                 }, {
                     layer: 'earthquakes-layer',
-                    opacity: 0,
-                }, {
-                   layer: 'seismic-layer',
-                   opacity: 0,
-               },
+                    opacity: 1,
+                 }, {
+                    layer: 'seismic-layer',
+                    opacity: 1,
+                 }, {
+                    layer: 'city-line-layer',
+                    opacity: 1,
+                 },
             ],
             onChapterExit: [
                 // {
@@ -170,4 +176,3 @@ var config = {
         }
     ]
 };
-
