@@ -1,5 +1,5 @@
 var config = {
-    style: 'mapbox://styles/mapbox/dark-v12',
+    style: 'mapbox://styles/mapbox/dark-v11',
     accessToken: 'pk.eyJ1Ijoidm0xMTk2MiIsImEiOiJjbTFqbHFsNWwxMGxxMmlweXdjYm9qZnNoIn0.Ca6Vt9ybed8zD4ZopE358Q',
     showMarkers: false,
     markerColor: '#3FB1CE',
