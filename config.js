@@ -34,7 +34,7 @@ var config = {
                     opacity: 1,
                  }, {
                     layer: 'earthquakes-layer',
-                    opacity: 0,
+                    opacity: 1,
                  }, {
                     layer: 'seismic-layer',
                     opacity: 0,
