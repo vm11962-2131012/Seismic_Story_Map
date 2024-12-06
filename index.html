@@ -384,15 +384,13 @@ map.on("load", function() {
         map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
     });
 
-    map.addSource('cities', {
-        type: 'geojson',
-        data: 'data/world-cities.geojson'
-    });
-
     map.addLayer({
         'id': 'city-layer',
         'type': 'circle',
-        'source': 'cities',
+        'source': {
+            'type': 'geojson',
+            'data': 'data/world-cities.geojson'
+        },
         'paint': {
             'circle-radius': 6,
             'circle-color': '#FEFF79',
